@@ -5,6 +5,31 @@ import ui_handler
 
 SCREEN_SIZE = (640, 480)
 
+def destroyanddraw(func):
+    """Decorator to destroy widgets before redrawing them."""
+    def newfunc(self):
+        attr = "__{}_pack".format(func.__name__)
+        if hasattr(self, attr):
+            for ele in getattr(self, attr):
+                ele.destroy()
+
+        setattr(self, attr, func(self))
+    return newfunc
+
+
+def drawonce(func):
+    """Decorator to draw widgets once."""
+    def newfunc(self):
+        attr = "__{}_drawn".format(func.__name__)
+        if hasattr(self, attr):
+            return
+        func(self)
+        setattr(self, attr, True)
+    return newfunc
+
+def getInstance():
+    return UI.getInstance()
+
 class UI:
     """
     Manages Interaction with the User Interface.
@@ -28,20 +53,30 @@ class UI:
         self.window_lock = threading.Lock()
         self.window.geometry('{}x{}'.format(SCREEN_SIZE[0], SCREEN_SIZE[1]))
         self.handler = ui_handler.UIHandler()
+        self.data = []
 
     def start(self):
-        with self.window_lock:
-            self.draw()
-            self.window.mainloop()
+        self.draw()
+        self.window.mainloop()
+
+    def update(self, filenames):
+        self.data = list(filenames)
+        self.draw()
 
     def draw(self):
-        self.draw_upload()
+        self.draw_buttons()
+        self.draw_labels()
 
-    def draw_upload(self):
+    @drawonce
+    def draw_buttons(self):
         button = tk.Button(self.window, text='Open File', command=self.handler.open_file)
-        button.pack(side = tk.TOP)
+        button.pack(side=tk.TOP)
 
-
-if __name__ == "__main__":
-    ui = UI.getInstance()
-    ui.start()
+    @destroyanddraw
+    def draw_labels(self):
+        pack = []
+        for d in self.data:
+            label = tk.Label(self.window, text=d)
+            label.pack(side=tk.TOP)
+            pack.append(label)
+        return pack

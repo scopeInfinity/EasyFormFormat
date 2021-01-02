@@ -35,7 +35,7 @@ class TestUI(unittest.TestCase):
         self.mock_tk_instance.mainloop.assert_called_once_with()
 
     @mock.patch("tkinter.Button")
-    def test_draw(self, fake_button):
+    def test_draw_buttons(self, fake_button):
         obj = ui.UI.getInstance()
         obj.draw()
         self.mock_tk.assert_called_once_with()
