@@ -1,6 +1,10 @@
 import tkinter as tk
 import threading
 
+import ui_handler
+
+SCREEN_SIZE = (640, 480)
+
 class UI:
     """
     Manages Interaction with the User Interface.
@@ -22,10 +26,20 @@ class UI:
                 "constructor.")
         self.window = tk.Tk()
         self.window_lock = threading.Lock()
-    
+        self.window.geometry('{}x{}'.format(SCREEN_SIZE[0], SCREEN_SIZE[1]))
+        self.handler = ui_handler.UIHandler()
+
     def start(self):
         with self.window_lock:
+            self.draw()
             self.window.mainloop()
+
+    def draw(self):
+        self.draw_upload()
+
+    def draw_upload(self):
+        button = tk.Button(self.window, text='Open File', command=self.handler.open_file)
+        button.pack(side = tk.TOP)
 
 
 if __name__ == "__main__":

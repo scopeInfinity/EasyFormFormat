@@ -27,11 +27,19 @@ class TestUI(unittest.TestCase):
             ui.UI()
         self.mock_tk.assert_not_called()
 
-    def test_start(self):
+    @mock.patch("tkinter.Button")
+    def test_start(self, fake_button):
         obj = ui.UI.getInstance()
         obj.start()
         self.mock_tk.assert_called_once_with()
         self.mock_tk_instance.mainloop.assert_called_once_with()
+
+    @mock.patch("tkinter.Button")
+    def test_draw(self, fake_button):
+        obj = ui.UI.getInstance()
+        obj.draw()
+        self.mock_tk.assert_called_once_with()
+        fake_button.assert_called_once_with(self.mock_tk_instance, text='Open File', command=obj.handler.open_file)
 
 
 if __name__ == '__main__':
