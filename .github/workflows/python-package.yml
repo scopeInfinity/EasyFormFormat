@@ -39,3 +39,13 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+        
+    - name: Package Application
+      uses: JackMcKew/pyinstaller-action-linux@main
+      with:
+        path: src
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: name-of-artifact-${{ matrix.python-version }}
+        path: src/dist/linux
