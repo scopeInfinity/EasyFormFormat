@@ -40,12 +40,22 @@ jobs:
       run: |
         pytest
         
-    - name: Package Application
-      uses: JackMcKew/pyinstaller-action-linux@main
+    - name: Package Linux
+      uses: JackMcKew/pyinstaller-action-linux@tkinter
       with:
         path: src
 
+    - name: PyInstaller Windows
+      uses: JackMcKew/pyinstaller-action-windows@main
+      with:
+        path: src
+      
     - uses: actions/upload-artifact@v2
       with:
-        name: name-of-artifact-${{ matrix.python-version }}
+        name: app-linux-${{ matrix.python-version }}
         path: src/dist/linux
+    
+    - uses: actions/upload-artifact@v2
+      with:
+        name: app-windows-${{ matrix.python-version }}
+        path: src/dist/windows
