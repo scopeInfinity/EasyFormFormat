@@ -1,4 +1,3 @@
-import logging
 from data import image
 from data.exporter import pdf, jpeg
 
@@ -12,4 +11,3 @@ def export(img: image.Image, fname: str):
         return jpeg.export(img, fname)
 
     raise ValueError(f"No exporter defined for {fmt}")
-

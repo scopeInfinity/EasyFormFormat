@@ -1,5 +1,5 @@
 from gui import ui, home
-import app
+import EasyFormFormat
 
 from typing import Type
 import tkinter as tk
@@ -7,9 +7,8 @@ import threading
 import signal
 import logging
 
-from gui import fillform
-
 SCREEN_SIZE = (640, 480)
+
 
 def register_signal_handlers(sigint_handler):
     def handler(*args):
@@ -34,13 +33,10 @@ class Window:
             logging.info("granted")
             cls.window = tk.Tk()
             cls.window.geometry('{}x{}'.format(SCREEN_SIZE[0], SCREEN_SIZE[1]))
-            cls.window.title(app.TITLE)
+            cls.window.title(EasyFormFormat.TITLE)
             register_signal_handlers(Window.kill)
             cls.update_window(home.Home)
             logging.info("executing mainloop")
-            # TODO: CLEANUP
-            cls.update_window(fillform.FillForm)
-            fillform.FillForm.add_entries(["/home/scopeinfinity/OSS/EasyFormFormat/src/96395.jpg"])
             cls.window.mainloop()
 
     @classmethod

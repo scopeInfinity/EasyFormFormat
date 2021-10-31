@@ -5,6 +5,7 @@ import logging
 LOG_FILE = "log.txt"
 TITLE = "Easy Form Format"
 
+
 def configure_logging():
     logging.basicConfig(
         level=logging.DEBUG,

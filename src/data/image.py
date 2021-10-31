@@ -6,19 +6,21 @@ from typing import Tuple
 import os
 import copy
 
+
 class ImageFormat(Enum):
     JPEG = 1
     PNG = 2
     PDF = 3
 
+
 class ExportFormat:
     def __init__(self,
-        format: ImageFormat,
-        resolution: Tuple[int, int],
-        min_size: int,
-        max_size: int):
+                 format: ImageFormat,
+                 resolution: Tuple[int, int],
+                 min_size: int,
+                 max_size: int):
         self.format = format  # type: ImageFormat
-        self.resolution = resolution # type: Tuple[int, int]
+        self.resolution = resolution  # type: Tuple[int, int]
         self.min_size = min_size  # type: int
         self.max_size = max_size  # type: int
 
@@ -31,7 +33,8 @@ class ExportFormat:
         if not all(type(x) == int for x in resolution):
             raise ValueError(f"invalid resolution: '{resolution}'")
         if resolution[0] <= 0 or resolution[1] <= 0:
-            raise ValueError("invalid resolution: '{resolution}', negative width/height")
+            raise ValueError(
+                "invalid resolution: '{resolution}', negative width/height")
         self.resolution = resolution
 
     def set_resolution_str(self, width: str, height: str):
@@ -40,7 +43,8 @@ class ExportFormat:
             h = int(height)
             self.set_resolution((w, h))
         except ValueError as err:
-            logging.error(f"invalid resolution: '{width}'x'{height}', err: {err}")
+            logging.error(
+                f"invalid resolution: '{width}'x'{height}', err: {err}")
 
     def set_quality_str(self, min_size: str, max_size: str):
         '''
@@ -53,7 +57,8 @@ class ExportFormat:
             self.min_size = min_s
             self.max_size = max_s
         except ValueError as err:
-            logging.error(f"invalid quality: '{min_size}' to '{max_size}' kb, err: {err}")
+            logging.error(
+                f"invalid quality: '{min_size}' to '{max_size}' kb, err: {err}")
 
     def get_quality_minsize(self):
         return self.min_size
@@ -68,7 +73,8 @@ class ExportFormat:
         self.format = format
 
 
-DEFAULT_EXPORT_FORMAT = ExportFormat(ImageFormat.JPEG, (640,480), 100, 400)
+DEFAULT_EXPORT_FORMAT = ExportFormat(ImageFormat.JPEG, (640, 480), 100, 400)
+
 
 class Image:
     """
@@ -85,7 +91,7 @@ class Image:
     def get_fname(self):
         return self.__fname
 
-    def get_name(self, max_length = None):
+    def get_name(self, max_length=None):
         if max_length is None:
             return self.__name
         return self.__name[:max_length]

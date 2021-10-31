@@ -4,7 +4,7 @@ from gui import ui, window, dialog
 import tkinter as tk
 from PIL import ImageTk
 
-from typing import Type, List
+from typing import List
 import os
 
 ENTRY_IMAGE_SZ = (80, 80)
@@ -18,7 +18,8 @@ def get_resolution(width: str, height: str):
             raise ValueError("negative width/height provided")
         return (w, h)
     except ValueError as err:
-        logging.error(f"called with width:'{width}', height:'{height}', err: {err}")
+        logging.error(
+            f"called with width:'{width}', height:'{height}', err: {err}")
         return None
 
 
@@ -27,12 +28,12 @@ class FillForm(ui.UI):
     Fill Form page
     """
 
-    entries = [] # type: List[image.Image]
+    entries = []  # type: List[image.Image]
     radio_selection = tk.IntVar
     radion_selected_image = None  # type: image.Image
 
     @classmethod
-    def add_entries(cls, fnames = None):
+    def add_entries(cls, fnames=None):
         if fnames is None:
             fnames = dialog.load_images()
         for fname in fnames:
@@ -54,7 +55,7 @@ class FillForm(ui.UI):
         frame = tk.Frame(
             pframe,
             height='100',
-            )
+        )
 
         radio = tk.Radiobutton(
             frame,
@@ -69,9 +70,9 @@ class FillForm(ui.UI):
         image_holder = tk.Label(
             frame,
             image=img,
-            )
+        )
         image_holder.img = img  # hold reference
-        image_holder.pack(side = tk.RIGHT)
+        image_holder.pack(side=tk.RIGHT)
 
         frame.pack(side=tk.TOP, anchor='n', fill='x')
 
@@ -79,7 +80,6 @@ class FillForm(ui.UI):
     def update_entry(cls, entry: image.Image):
         cls.radion_selected_image = entry
         cls.redraw()
-
 
     @classmethod
     def populate_entry_details(cls, pframe: tk.Tk, entry: image.Image):
@@ -112,56 +112,57 @@ class FillForm(ui.UI):
                 fmt.set_resolution_str(res_w_var.get(), res_h_var.get())
                 fmt.set_quality_str(size_min_kb.get(), size_max_kb.get())
             except ValueError as e:
-                dialog.popup("Invalid Input", f"Failed to save all details: {e}")
+                dialog.popup("Invalid Input",
+                             f"Failed to save all details: {e}")
             cls.redraw()
 
         tk.Button(
             pframe,
-            text = 'Save',
-            command = lambda: save_details(),
-            ).pack(side = tk.TOP)
+            text='Save',
+            command=lambda: save_details(),
+        ).pack(side=tk.TOP)
 
         tk.Entry(
             pframe,
-            textvariable = name_var,
-            ).pack(side = tk.TOP)
+            textvariable=name_var,
+        ).pack(side=tk.TOP)
 
         img = ImageTk.PhotoImage(entry.get_scaled_image(ENTRY_IMAGE_SZ))
         image_holder = tk.Label(
             pframe,
             image=img,
-            )
+        )
         image_holder.img = img  # hold reference
-        image_holder.pack(side = tk.TOP)
+        image_holder.pack(side=tk.TOP)
 
         tk.Label(
             pframe,
             text="resolution WxH"
-            ).pack(side = tk.TOP)
+        ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
-            textvariable = res_w_var,
-            ).pack(side = tk.TOP)
+            textvariable=res_w_var,
+        ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
-            textvariable = res_h_var,
-            ).pack(side = tk.TOP)
+            textvariable=res_h_var,
+        ).pack(side=tk.TOP)
 
         tk.Label(
             pframe,
             text="quality min_size max_size in KB",
-            ).pack(side = tk.TOP)
+        ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
-            textvariable = size_min_kb,
-            ).pack(side = tk.TOP)
+            textvariable=size_min_kb,
+        ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
-            textvariable = size_max_kb,
-            ).pack(side = tk.TOP)
+            textvariable=size_max_kb,
+        ).pack(side=tk.TOP)
 
         options = [fmt.name for fmt in image.ImageFormat]
-        drop = tk.OptionMenu(pframe , img_format , *options)
+        drop = tk.OptionMenu(pframe, img_format, *options)
         drop.pack(side=tk.TOP)
 
     @classmethod
@@ -172,9 +173,9 @@ class FillForm(ui.UI):
         # are unsaved changes for current image
         tk.Button(
             root,
-            text = 'Export All',
-            command = lambda: cls.export_all(),
-            ).pack(side = tk.BOTTOM)
+            text='Export All',
+            command=lambda: cls.export_all(),
+        ).pack(side=tk.BOTTOM)
 
         # Left Side
         frame_entry = tk.Frame(
@@ -184,12 +185,12 @@ class FillForm(ui.UI):
 
         tk.Button(
             frame_entry,
-            text = "Add entries",
+            text="Add entries",
             command=lambda: cls.add_entries(),
-        ).pack(side = tk.TOP)
+        ).pack(side=tk.TOP)
         for entry in cls.entries:
             cls.populate_entry(frame_entry, entry)
-        frame_entry.pack(side= tk.LEFT, fill=tk.BOTH, expand=True)
+        frame_entry.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Right Side
         frame_details = tk.Frame(
@@ -197,9 +198,4 @@ class FillForm(ui.UI):
             bg='green',
         )
         cls.populate_entry_details(frame_details, cls.radion_selected_image)
-        frame_details.pack(side = tk.LEFT, fill=tk.BOTH, expand=True)
-
-
-
-
-
+        frame_details.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)

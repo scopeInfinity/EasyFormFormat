@@ -1,7 +1,7 @@
 from gui import window
 
 import abc
-import tkinter as tk
+
 
 class UI(abc.ABC):
     """
@@ -16,4 +16,3 @@ class UI(abc.ABC):
     @classmethod
     def redraw(cls):
         window.Window.redraw()
-
