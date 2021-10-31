@@ -3,13 +3,7 @@
 
 name: Python package
 
-on:
-  push:
-    branches: [ main ]
-
-  pull_request:
-
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
@@ -36,24 +30,26 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
 
-    - name: Package Linux
-      uses: JackMcKew/pyinstaller-action-linux@tkinter
-      with:
-        path: src
+    # - name: Test with pytest
+    #   run: |
+    #     pytest
+
+    # - name: Package Linux
+    #   uses: JackMcKew/pyinstaller-action-linux@tkinter
+    #   with:
+    #     path: src
+    #     tkinter: true
 
     - name: PyInstaller Windows
       uses: JackMcKew/pyinstaller-action-windows@main
       with:
         path: src
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: app-linux-${{ matrix.python-version }}
-        path: src/dist/linux
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: app-linux-${{ matrix.python-version }}
+    #     path: src/dist/linux
 
     - uses: actions/upload-artifact@v2
       with:
