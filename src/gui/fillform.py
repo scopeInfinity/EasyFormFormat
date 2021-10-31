@@ -120,49 +120,62 @@ class FillForm(ui.UI):
             pframe,
             text='Save',
             command=lambda: save_details(),
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
         tk.Entry(
             pframe,
             textvariable=name_var,
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
         img = ImageTk.PhotoImage(entry.get_scaled_image(ENTRY_IMAGE_SZ))
         image_holder = tk.Label(
             pframe,
             image=img,
+            borderwidth=ui.FRAME_BORDER,
         )
         image_holder.img = img  # hold reference
         image_holder.pack(side=tk.TOP)
 
         tk.Label(
             pframe,
-            text="resolution WxH"
+            text="resolution WxH",
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
             textvariable=res_w_var,
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
             textvariable=res_h_var,
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
         tk.Label(
             pframe,
             text="quality min_size max_size in KB",
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
             textvariable=size_min_kb,
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
         tk.Entry(
             pframe,
             textvariable=size_max_kb,
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
         options = [fmt.name for fmt in image.ImageFormat]
-        drop = tk.OptionMenu(pframe, img_format, *options)
+        drop = tk.OptionMenu(
+            pframe,
+            img_format,
+            *options,
+        )
         drop.pack(side=tk.TOP)
 
     @classmethod
@@ -175,18 +188,22 @@ class FillForm(ui.UI):
             root,
             text='Export All',
             command=lambda: cls.export_all(),
+            borderwidth=ui.FRAME_BORDER,
+            pady=ui.FRAME_BORDER,
         ).pack(side=tk.BOTTOM)
 
         # Left Side
         frame_entry = tk.Frame(
             root,
-            bg='red',
+            borderwidth=ui.FRAME_BORDER,
         )
 
         tk.Button(
             frame_entry,
             text="Add entries",
             command=lambda: cls.add_entries(),
+            pady=ui.FRAME_BORDER,
+            borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
         for entry in cls.entries:
             cls.populate_entry(frame_entry, entry)
@@ -195,7 +212,7 @@ class FillForm(ui.UI):
         # Right Side
         frame_details = tk.Frame(
             root,
-            bg='green',
+            borderwidth=ui.FRAME_BORDER,
         )
         cls.populate_entry_details(frame_details, cls.radion_selected_image)
         frame_details.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)

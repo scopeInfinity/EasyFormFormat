@@ -13,8 +13,23 @@ class Home(ui.UI):
     @classmethod
     def draw(cls):
         root = window.Window.get_tk()
+        tk.Label(
+            root,
+            text="Easy Form Format",
+            pady=ui.FRAME_BORDER*32,
+            font=("Courier", 64),
+        ).pack(side=tk.TOP)
+
         tk.Button(
             root,
-            text="Fill form",
-            command=lambda: window.Window.update_window(fillform.FillForm)
+            text="New Project",
+            command=lambda: window.Window.update_window(fillform.FillForm),
+            pady=ui.FRAME_BORDER*8,
+        ).pack(side=tk.TOP)
+
+        tk.Button(
+            root,
+            text="Load Project (same as new)",
+            command=lambda: window.Window.update_window(fillform.FillForm),
+            pady=ui.FRAME_BORDER*8,
         ).pack(side=tk.TOP)

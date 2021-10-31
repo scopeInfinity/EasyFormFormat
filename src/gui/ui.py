@@ -2,6 +2,8 @@ from gui import window
 
 import abc
 
+FRAME_BORDER = 4
+
 
 class UI(abc.ABC):
     """

@@ -7,7 +7,7 @@ import threading
 import signal
 import logging
 
-SCREEN_SIZE = (640, 480)
+SCREEN_SIZE = (1024, 768)
 
 
 def register_signal_handlers(sigint_handler):
