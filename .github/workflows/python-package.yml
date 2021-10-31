@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.5', '3.6', '3.7', '3.8']
+        python-version: ['3.8']
 
     steps:
     - uses: actions/checkout@v2
@@ -39,7 +39,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-        
+
     - name: Package Linux
       uses: JackMcKew/pyinstaller-action-linux@tkinter
       with:
@@ -49,12 +49,12 @@ jobs:
       uses: JackMcKew/pyinstaller-action-windows@main
       with:
         path: src
-      
+
     - uses: actions/upload-artifact@v2
       with:
         name: app-linux-${{ matrix.python-version }}
         path: src/dist/linux
-    
+
     - uses: actions/upload-artifact@v2
       with:
         name: app-windows-${{ matrix.python-version }}
