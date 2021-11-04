@@ -9,10 +9,7 @@ def export(img: image.Image, fname: str):
     new_img = img.get_scaled_image(res)
 
     def tmp_exporter(fname, quality):
-        return new_img.save(fname,
-                            save_all=True,
-                            append_images=[],
-                            quality=quality)
+        return new_img.save(fname, quality=quality)
 
     generic.get_image_quality(
         fname,

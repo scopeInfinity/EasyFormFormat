@@ -13,19 +13,25 @@ Application to help users to save time while filling various forms online which 
 #### Image Export Options
 - [x] Accept image size in pixels.
 - [ ] Accept image size in cm/inch.
+- [x] Accept image min size and max size in bytes.
 
 #### Import Image Format
 - [X] JPEG
-- [ ] PNG
+- [X] PNG
 - [ ] PDF
 - [ ] Word
 
 #### Export Image Format
 - [X] JPEG
-- [ ] PNG
+- [X] PNG
+  - [ ] File resize pending
 - [X] PDF
 - [ ] PDF in standard size (A4, etc)
 
 #### Complex
-- [ ] Merge multiple photo into single photo.
+- [ ] Merge multiple photo into single photo
 - [ ] Create multiple page PDF
+
+#### Users Feedback
+- [ ] As feedback form
+- [ ] Submit images or project which causes trouble

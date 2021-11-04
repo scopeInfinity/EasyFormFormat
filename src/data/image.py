@@ -46,24 +46,24 @@ class ExportFormat:
             logging.error(
                 f"invalid resolution: '{width}'x'{height}', err: {err}")
 
-    def set_quality_str(self, min_size: str, max_size: str):
+    def set_quality_str(self, min_size_kb: str, max_size_kb: str):
         '''
-        Set export quality range by min_size and max_size in kb.
+        Set export quality range by min_size_kb and max_size_kb.
         '''
         try:
-            min_s = int(min_size)
-            max_s = int(max_size)
+            min_s = int(min_size_kb)
+            max_s = int(max_size_kb)
 
             self.min_size = min_s
             self.max_size = max_s
         except ValueError as err:
             logging.error(
-                f"invalid quality: '{min_size}' to '{max_size}' kb, err: {err}")
+                f"invalid quality: '{min_size_kb}' to '{max_size_kb}' kb, err: {err}")
 
-    def get_quality_minsize(self):
+    def get_quality_minsize_kb(self):
         return self.min_size
 
-    def get_quality_maxsize(self):
+    def get_quality_maxsize_kb(self):
         return self.max_size
 
     def get_format(self) -> ImageFormat:
@@ -115,7 +115,7 @@ class Image:
         return self.__image
 
     def get_scaled_image(self, sz) -> PILImage.Image:
-        return self.get_image().resize(sz)
+        return self.get_image().resize(sz, PILImage.ANTIALIAS)
 
     def __str__(self) -> str:
         return "[%s]" % self.get_name()

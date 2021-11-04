@@ -101,8 +101,8 @@ class FillForm(ui.UI):
         img_format.set(fmt.get_format().name)
         res_w_var.set(str(fmt.get_resolution()[0]))
         res_h_var.set(str(fmt.get_resolution()[1]))
-        size_min_kb.set(str(fmt.get_quality_minsize()))
-        size_max_kb.set(str(fmt.get_quality_maxsize()))
+        size_min_kb.set(str(fmt.get_quality_minsize_kb()))
+        size_max_kb.set(str(fmt.get_quality_maxsize_kb()))
 
         def save_details():
             try:
