@@ -8,6 +8,7 @@ import signal
 import logging
 
 SCREEN_SIZE = (1024, 768)
+WINDOW_ICON = "eff.png"
 
 
 def register_signal_handlers(sigint_handler):
@@ -65,4 +66,9 @@ class Window:
     def redraw(cls):
         logging.debug("")
         cls.clear()
+
+        root = cls.get_tk()
+        root.tk.call("wm", "iconphoto", root._w,
+                     tk.PhotoImage(file=WINDOW_ICON))
+
         cls.current_ui.draw()
