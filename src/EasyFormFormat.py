@@ -9,6 +9,7 @@ TITLE = "Easy Form Format"
 def configure_logging():
     logging.basicConfig(
         level=logging.DEBUG,
+        # TODO: Write log in file for production only.
         filename=LOG_FILE,
         format="[%(levelname)s][%(filename)s:%(lineno)s %(funcName)s] %(message)s",
     )

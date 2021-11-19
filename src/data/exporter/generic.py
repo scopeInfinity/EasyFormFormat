@@ -6,6 +6,14 @@ from data import image
 from data.exporter import pdf, simple_image_fmt
 
 
+class ExportException(Exception):
+    pass
+
+
+class ExportFileAlreadyExistsException(Exception):
+    pass
+
+
 def get_image_quality(fname: str,
                       min_kb: int,
                       max_kb: int,

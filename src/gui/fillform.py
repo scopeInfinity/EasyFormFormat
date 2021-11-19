@@ -1,11 +1,13 @@
 import logging
-from data import image, processor
+from data.exporter import generic
+from data import image, entity
+from data import state
 from gui import ui, window, dialog
 import tkinter as tk
 from PIL import ImageTk
 
-from typing import List
-import os
+from typing import Optional
+from functools import partial
 
 ENTRY_IMAGE_SZ = (80, 80)
 
@@ -28,30 +30,113 @@ class FillForm(ui.UI):
     Fill Form page
     """
 
-    entries = []  # type: List[image.Image]
     radio_selection = tk.IntVar
-    radion_selected_image = None  # type: image.Image
+    radio_selected_index = 0  # type: int
 
     @classmethod
-    def add_entries(cls, fnames=None):
-        if fnames is None:
-            fnames = dialog.load_images()
-        for fname in fnames:
-            cls.entries.append(image.Image(fname))
-        cls.redraw()
+    @dialog.dec_ui_useraction
+    def save_project(cls):
+        fname = dialog.save_project()
+        if not fname:
+            return
+        state.get_state().get_project().save(fname)
 
     @classmethod
+    @dialog.dec_ui_useraction
+    def load_project(cls):
+        fname = dialog.load_project()
+        if not fname:
+            return
+        # TODO: ask user if they want to continue during pending changes
+        state.get_state().load_new_project(fname)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def new_project(cls):
+        # TODO: ask user if they want to continue during pending changes
+        state.get_state().reset_project()
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def _exit(cls):
+        # TODO: ask user if they want to continue during pending changes
+        exit(0)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def show_about(cls):
+        # TODO: Add more details
+        dialog.popup("About", "EasyFormFormat v1.0")
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def add_entries(cls):
+        fnames = dialog.load_images()
+        if not fnames:
+            return
+        state.get_state().get_project().add_entity(fnames)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def update_entity(cls,
+                      e: entity.Entity,
+                      name: Optional[str] = None,
+                      fmt: Optional[str] = None,
+                      w: Optional[str] = None,
+                      h: Optional[str] = None,
+                      sz_min: Optional[str] = None,
+                      sz_max: Optional[str] = None,
+                      ):
+        # TODO: implement
+        e.set_name(name)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def add_image_in_entity(cls, e: entity.Entity):
+        fnames = dialog.load_images()
+        e.add_images(fnames)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def entity_image_del(cls, e: entity.Entity, index: int):
+        e.remove_image(index)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def entity_image_move_up(cls, e: entity.Entity, index: int):
+        if index > 0:
+            e.swap_images(index, index-1)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def entity_image_move_down(cls, e: entity.Entity, index: int):
+        if index < e.get_images_count() - 1:
+            e.swap_images(index, index+1)
+
+    @classmethod
+    @dialog.dec_ui_useraction
+    def select_entity(cls, index: int):
+        cls.radio_selected_index = index
+
+    @classmethod
+    @dialog.dec_ui_useraction
     def export_all(cls):
         try:
             dname = dialog.export_directory()
-            processor.export_all(cls.entries, os.path.join(dname, "eff"))
-        except ValueError as e:
-            dialog.popup("Export Failed", str(e))
+            p = state.get_state().get_project()
+            try:
+                p.export_prep(dname)
+            except generic.ExportFileAlreadyExistsException:
+                # TODO: ask user if they are ok with overwrite.
+                pass
+            p.export(dname)
+        except generic.ExportException as e:
+            dialog.popup_error("Export Failed", str(e))
             return
-        dialog.popup("Export", "Success!")
+        dialog.popup("Export", "Successful")
 
     @classmethod
-    def populate_entry(cls, pframe: tk.Tk, entry: image.Image):
+    def populate_entity(cls, index: int, pframe: tk.Tk, e: entity.Entity):
         frame = tk.Frame(
             pframe,
             height='100',
@@ -60,13 +145,13 @@ class FillForm(ui.UI):
         radio = tk.Radiobutton(
             frame,
             variable=cls.radio_selection,
-            value=id(entry),
-            text=entry.get_name(max_length=40),
-            command=lambda: cls.update_entry(entry),
+            value=id(e),
+            text=e.get_name(max_length=40),
+            command=partial(cls.select_entity, index),
         )
         radio.pack(side=tk.LEFT)
 
-        img = ImageTk.PhotoImage(entry.get_scaled_image(ENTRY_IMAGE_SZ))
+        img = ImageTk.PhotoImage(e.get_thumbnail(ENTRY_IMAGE_SZ))
         image_holder = tk.Label(
             frame,
             image=img,
@@ -77,13 +162,8 @@ class FillForm(ui.UI):
         frame.pack(side=tk.TOP, anchor='n', fill='x')
 
     @classmethod
-    def update_entry(cls, entry: image.Image):
-        cls.radion_selected_image = entry
-        cls.redraw()
-
-    @classmethod
-    def populate_entry_details(cls, pframe: tk.Tk, entry: image.Image):
-        if entry is None:
+    def populate_entity_details(cls, pframe: tk.Tk, e: entity.Entity):
+        if e is None:
             tk.Label(
                 pframe,
                 text="Please select a option",
@@ -96,30 +176,37 @@ class FillForm(ui.UI):
         size_min_kb = tk.StringVar()
         size_max_kb = tk.StringVar()
 
-        name_var.set(entry.get_name())
-        fmt = entry.get_export_format()
+        name_var.set(e.get_name())
+        fmt = e.get_export_options()
+
         img_format.set(fmt.get_format().name)
-        res_w_var.set(str(fmt.get_resolution()[0]))
-        res_h_var.set(str(fmt.get_resolution()[1]))
-        size_min_kb.set(str(fmt.get_quality_minsize_kb()))
-        size_max_kb.set(str(fmt.get_quality_maxsize_kb()))
+        # res_w_var.set(str(fmt.get_resolution()[0]))
+        # res_h_var.set(str(fmt.get_resolution()[1]))
+        # size_min_kb.set(str(fmt.get_quality_minsize_kb()))
+        # size_max_kb.set(str(fmt.get_quality_maxsize_kb()))
 
         def save_details():
-            try:
-                entry.set_name(name_var.get())
-                fmt = entry.get_export_format()
-                fmt.set_format(image.ImageFormat[img_format.get()])
-                fmt.set_resolution_str(res_w_var.get(), res_h_var.get())
-                fmt.set_quality_str(size_min_kb.get(), size_max_kb.get())
-            except ValueError as e:
-                dialog.popup("Invalid Input",
-                             f"Failed to save all details: {e}")
-            cls.redraw()
+            cls.update_entity(
+                e,
+                name=name_var.get(),
+                fmt=img_format.get(),
+                w=res_w_var.get(),
+                h=res_h_var.get(),
+                sz_min=size_min_kb.get(),
+                sz_max=size_max_kb.get(),
+            )
 
         tk.Button(
             pframe,
             text='Save',
-            command=lambda: save_details(),
+            command=save_details,
+            borderwidth=ui.FRAME_BORDER,
+        ).pack(side=tk.TOP)
+
+        tk.Button(
+            pframe,
+            text='Add Image',
+            command=partial(cls.add_image_in_entity, e),
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
@@ -129,14 +216,38 @@ class FillForm(ui.UI):
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
-        img = ImageTk.PhotoImage(entry.get_scaled_image(ENTRY_IMAGE_SZ))
-        image_holder = tk.Label(
-            pframe,
-            image=img,
-            borderwidth=ui.FRAME_BORDER,
-        )
-        image_holder.img = img  # hold reference
-        image_holder.pack(side=tk.TOP)
+        thumbnails_count = e.get_images_count()
+        thumbnails = e.get_all_images_thumbnail(ENTRY_IMAGE_SZ)
+        for it, t in enumerate(thumbnails):
+            fr = tk.Frame(pframe)
+            img = ImageTk.PhotoImage(t)
+            image_holder = tk.Label(
+                fr,
+                image=img,
+                borderwidth=ui.FRAME_BORDER,
+            )
+            image_holder.img = img  # hold reference
+            image_holder.pack(side=tk.LEFT)
+
+            fr_subbuttons = tk.Frame(fr)
+            tk.Button(fr_subbuttons,
+                      text="x",
+                      state=tk.DISABLED if thumbnails_count == 1 else None,
+                      command=partial(cls.entity_image_del, e, it),
+                      ).pack(side=tk.TOP)
+            tk.Button(fr_subbuttons,
+                      text="^",
+                      state=tk.DISABLED if it == 0 else None,
+                      command=partial(cls.entity_image_move_up, e, it),
+                      ).pack(side=tk.TOP)
+            tk.Button(fr_subbuttons,
+                      text="v",
+                      state=tk.DISABLED if it == thumbnails_count-1 else None,
+                      command=partial(cls.entity_image_move_down, e, it),
+                      ).pack(side=tk.TOP)
+            fr_subbuttons.pack(side=tk.RIGHT)
+
+            fr.pack(side=tk.TOP)
 
         tk.Label(
             pframe,
@@ -181,38 +292,59 @@ class FillForm(ui.UI):
     @classmethod
     def draw(cls):
         root = window.Window.get_tk()
+        p = state.get_state().get_project()
+
+        # Menu bar
+        menubar = tk.Menu(root)
+        root.config(menu=menubar)
+        m_file = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label='File', menu=m_file)
+        m_file.add_command(label='New Project', command=cls.new_project)
+        m_file.add_command(label='Save Project', command=cls.save_project)
+        m_file.add_command(label='Load Project', command=cls.load_project)
+        m_file.add_separator()
+        m_file.add_command(label='Exit', command=cls._exit)
+
+        m_help = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label='Help', menu=m_help)
+        # TODO: implement help support
+        m_help.add_command(label='Get Started')
+        m_help.add_command(label='About', command=cls.show_about)
 
         # Note: human can press "export all" where there
         # are unsaved changes for current image
         tk.Button(
             root,
             text='Export All',
-            command=lambda: cls.export_all(),
+            command=cls.export_all,
             borderwidth=ui.FRAME_BORDER,
             pady=ui.FRAME_BORDER,
         ).pack(side=tk.BOTTOM)
 
         # Left Side
-        frame_entry = tk.Frame(
+        frame_entities = tk.Frame(
             root,
             borderwidth=ui.FRAME_BORDER,
         )
 
         tk.Button(
-            frame_entry,
+            frame_entities,
             text="Add entries",
-            command=lambda: cls.add_entries(),
+            command=cls.add_entries,
             pady=ui.FRAME_BORDER,
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
-        for entry in cls.entries:
-            cls.populate_entry(frame_entry, entry)
-        frame_entry.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        for it, e in enumerate(p.get_entities()):
+            cls.populate_entity(it, frame_entities, e)
+        frame_entities.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Right Side
         frame_details = tk.Frame(
             root,
             borderwidth=ui.FRAME_BORDER,
         )
-        cls.populate_entry_details(frame_details, cls.radion_selected_image)
+        selected_entity = None
+        if cls.radio_selected_index >= 0 and cls.radio_selected_index < len(p.get_entities()):
+            selected_entity = p.get_entities()[cls.radio_selected_index]
+        cls.populate_entity_details(frame_details, selected_entity)
         frame_details.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
