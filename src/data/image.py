@@ -13,7 +13,7 @@ class ImageFormat(Enum):
     PDF = 3
 
 
-class ExportFormat:
+class ExportOption:
     def __init__(self,
                  format: ImageFormat,
                  resolution: Tuple[int, int],
@@ -73,7 +73,7 @@ class ExportFormat:
         self.format = format
 
 
-DEFAULT_EXPORT_FORMAT = ExportFormat(ImageFormat.JPEG, (640, 480), 100, 400)
+DEFAULT_EXPORT_OPTION = ExportOption(ImageFormat.JPEG, (640, 480), 100, 400)
 
 
 class Image:
@@ -85,24 +85,19 @@ class Image:
         self.__fname = None  # type: str
         self.__image = None  # type: PILImage.Image
         self.__name = os.path.basename(fname)
-        self.export_format = copy.deepcopy(DEFAULT_EXPORT_FORMAT)
+        self.export_format = copy.deepcopy(DEFAULT_EXPORT_OPTION)
         self.load_image(fname)
 
     def get_fname(self):
         return self.__fname
 
-    def get_name(self, max_length=None):
-        if max_length is None:
-            return self.__name
-        return self.__name[:max_length]
-
     def set_name(self, name):
         self.__name = name
 
-    def update_export_format(self, fmt: ExportFormat):
+    def update_export_format(self, fmt: ExportOption):
         self.export_format = fmt
 
-    def get_export_format(self) -> ExportFormat:
+    def get_export_format(self) -> ExportOption:
         return self.export_format
 
     def load_image(self, fname: str):
