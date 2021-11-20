@@ -32,6 +32,10 @@ Application to help users to save time while filling various forms online which 
 - [ ] Merge multiple photo into single photo
 - [ ] Create multiple page PDF
 
+#### Project
+- [ ] Save/load option
+- [ ] Backward compatible
+
 #### Users Feedback
 - [ ] As feedback form
 - [ ] Submit images or project which causes trouble

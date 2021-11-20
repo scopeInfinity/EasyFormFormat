@@ -4,6 +4,7 @@ from data.exporter import pdf, simple_image_fmt
 from PIL import Image as PILImage
 from typing import List, Optional, Tuple
 import os
+import copy
 
 
 class Entity:
@@ -11,7 +12,8 @@ class Entity:
         self.name = name
         self.images = []  # type: List[image.Image]
         self.add_images(fnames)
-        self.opts = image.DEFAULT_EXPORT_OPTION
+        self.opts = copy.deepcopy(image.DEFAULT_EXPORT_OPTION)
+        self.opts.set_resolution(self.images[0].get_original_size())
 
     def set_name(self, name: str) -> None:
         self.name = name
@@ -27,10 +29,10 @@ class Entity:
         return self.images[0].get_scaled_image(sz)
 
     def get_all_images_thumbnail(self, sz: Tuple[int, int]) -> List[PILImage.Image]:
-        l = []  # type: List[PILImage.Image]
+        lst = []  # type: List[PILImage.Image]
         for img in self.images:
-            l.append(img.get_scaled_image(sz))
-        return l
+            lst.append(img.get_scaled_image(sz))
+        return lst
 
     def add_images(self, fnames: List[str]) -> None:
         for fname in fnames:
@@ -93,3 +95,6 @@ class Entity:
             return pdf.export(self, ofname)
 
         assert False, f"no export redirector for {fmt}"
+
+    def __str__(self) -> str:
+        return "[entity/%s]" % self.get_name()

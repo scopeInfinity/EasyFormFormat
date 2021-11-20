@@ -82,13 +82,34 @@ class FillForm(ui.UI):
                       e: entity.Entity,
                       name: Optional[str] = None,
                       fmt: Optional[str] = None,
-                      w: Optional[str] = None,
-                      h: Optional[str] = None,
-                      sz_min: Optional[str] = None,
-                      sz_max: Optional[str] = None,
+                      w_str: Optional[str] = None,
+                      h_str: Optional[str] = None,
+                      sz_min_str: Optional[str] = None,
+                      sz_max_str: Optional[str] = None,
                       ):
         # TODO: implement
+        try:
+            w = int(w_str)
+            h = int(h_str)
+        except ValueError as err:
+            logging.error(
+                f"invalid resolution: '{w_str}'x'{h_str}', err: {err}")
+            raise ValueError(f"Invalid resolution provided '{w_str}x{h_str}'")
+
+        try:
+            sz_min = int(sz_min_str)
+            sz_max = int(sz_max_str)
+        except ValueError as err:
+            logging.error(
+                f"invalid filesize: '{sz_min_str}...{sz_max_str}', err: {err}")
+            raise ValueError(
+                f"Invalid resolution provided '{sz_min_str}...{sz_max_str}'")
+
         e.set_name(name)
+        opts = e.get_export_options()
+        opts.set_resolution((w, h))
+        opts.set_format(image.ImageFormat[fmt])
+        opts.set_filesize(sz_min, sz_max)
 
     @classmethod
     @dialog.dec_ui_useraction
@@ -180,22 +201,23 @@ class FillForm(ui.UI):
         fmt = e.get_export_options()
 
         img_format.set(fmt.get_format().name)
-        # res_w_var.set(str(fmt.get_resolution()[0]))
-        # res_h_var.set(str(fmt.get_resolution()[1]))
-        # size_min_kb.set(str(fmt.get_quality_minsize_kb()))
-        # size_max_kb.set(str(fmt.get_quality_maxsize_kb()))
+        res_w_var.set(str(fmt.get_resolution()[0]))
+        res_h_var.set(str(fmt.get_resolution()[1]))
+        size_min_kb.set(str(fmt.get_size_min_kb()))
+        size_max_kb.set(str(fmt.get_size_max_kb()))
 
         def save_details():
             cls.update_entity(
                 e,
                 name=name_var.get(),
                 fmt=img_format.get(),
-                w=res_w_var.get(),
-                h=res_h_var.get(),
-                sz_min=size_min_kb.get(),
-                sz_max=size_max_kb.get(),
+                w_str=res_w_var.get(),
+                h_str=res_h_var.get(),
+                sz_min_str=size_min_kb.get(),
+                sz_max_str=size_max_kb.get(),
             )
 
+        # TODO: We should have auto save for entities.
         tk.Button(
             pframe,
             text='Save',
@@ -281,11 +303,10 @@ class FillForm(ui.UI):
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
-        options = [fmt.name for fmt in image.ImageFormat]
         drop = tk.OptionMenu(
             pframe,
             img_format,
-            *options,
+            *[fmt.name for fmt in e.get_allowed_fmts()],
         )
         drop.pack(side=tk.TOP)
 
@@ -300,6 +321,7 @@ class FillForm(ui.UI):
         m_file = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label='File', menu=m_file)
         m_file.add_command(label='New Project', command=cls.new_project)
+        # TODO: Currently we have "save as", we should also have simple save.
         m_file.add_command(label='Save Project', command=cls.save_project)
         m_file.add_command(label='Load Project', command=cls.load_project)
         m_file.add_separator()

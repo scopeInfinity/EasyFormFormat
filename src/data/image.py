@@ -3,8 +3,6 @@ from PIL import Image as PILImage
 from enum import Enum
 
 from typing import Tuple
-import os
-import copy
 
 
 class ImageFormat(Enum):
@@ -37,14 +35,9 @@ class ExportOption:
                 "invalid resolution: '{resolution}', negative width/height")
         self.resolution = resolution
 
-    def set_resolution_str(self, width: str, height: str):
-        try:
-            w = int(width)
-            h = int(height)
-            self.set_resolution((w, h))
-        except ValueError as err:
-            logging.error(
-                f"invalid resolution: '{width}'x'{height}', err: {err}")
+    def set_filesize(self, min_size_kb: int, max_size_kb: int):
+        self.min_size = min_size_kb
+        self.max_size = max_size_kb
 
     def set_quality_str(self, min_size_kb: str, max_size_kb: str):
         '''
@@ -60,10 +53,10 @@ class ExportOption:
             logging.error(
                 f"invalid quality: '{min_size_kb}' to '{max_size_kb}' kb, err: {err}")
 
-    def get_quality_minsize_kb(self):
+    def get_size_min_kb(self):
         return self.min_size
 
-    def get_quality_maxsize_kb(self):
+    def get_size_max_kb(self):
         return self.max_size
 
     def get_format(self) -> ImageFormat:
@@ -84,33 +77,21 @@ class Image:
     def __init__(self, fname: str):
         self.__fname = None  # type: str
         self.__image = None  # type: PILImage.Image
-        self.__name = os.path.basename(fname)
-        self.export_format = copy.deepcopy(DEFAULT_EXPORT_OPTION)
         self.load_image(fname)
 
     def get_fname(self):
         return self.__fname
 
-    def set_name(self, name):
-        self.__name = name
-
-    def update_export_format(self, fmt: ExportOption):
-        self.export_format = fmt
-
-    def get_export_format(self) -> ExportOption:
-        return self.export_format
-
     def load_image(self, fname: str):
         logging.info(f"loading: {fname}")
         self.__fname = fname
         self.__image = PILImage.open(self.__fname)
-        self.get_export_format().set_resolution(self.__image.size)
 
     def get_image(self) -> PILImage.Image:
         return self.__image
 
+    def get_original_size(self) -> Tuple[int, int]:
+        return self.__image.size
+
     def get_scaled_image(self, sz) -> PILImage.Image:
         return self.get_image().resize(sz, PILImage.ANTIALIAS)
-
-    def __str__(self) -> str:
-        return "[%s]" % self.get_name()
