@@ -57,3 +57,16 @@ def dec_ui_useraction(f):
         finally:
             cls.redraw()
     return new_f
+
+# TODO: merge with dec_ui_useraction
+
+
+def dec_ui_useraction_noredraw(f):
+    # dec_useraction + finally redraw
+    def new_f(cls, *args, **kwargs):
+        try:
+            return f(cls, *args, **kwargs)
+        except ValueError as e:
+            # invalid user input
+            popup_error("Invalid Input", str(e))
+    return new_f
