@@ -30,7 +30,6 @@ class FillForm(ui.UI):
     Fill Form page
     """
 
-    radio_selection = tk.IntVar
     radio_selected_index = 0  # type: int
 
     @classmethod
@@ -57,13 +56,13 @@ class FillForm(ui.UI):
         state.get_state().reset_project()
 
     @classmethod
-    @dialog.dec_ui_useraction
+    @dialog.dec_ui_useraction_noredraw
     def _exit(cls):
         # TODO: ask user if they want to continue during pending changes
         exit(0)
 
     @classmethod
-    @dialog.dec_ui_useraction
+    @dialog.dec_ui_useraction_noredraw
     def show_about(cls):
         # TODO: Add more details
         dialog.popup("About", "EasyFormFormat v1.0")
@@ -77,7 +76,7 @@ class FillForm(ui.UI):
         state.get_state().get_project().add_entity(fnames)
 
     @classmethod
-    @dialog.dec_ui_useraction
+    @dialog.dec_ui_useraction_noredraw
     def update_entity(cls,
                       e: entity.Entity,
                       name: Optional[str] = None,
@@ -87,7 +86,13 @@ class FillForm(ui.UI):
                       sz_min_str: Optional[str] = None,
                       sz_max_str: Optional[str] = None,
                       ):
-        # TODO: implement
+        if (w_str is None) ^ (h_str is None):
+            raise Exception(
+                "Only one among w_str or h_str provided in update_entity")
+        if (sz_min_str is None) ^ (sz_max_str is None):
+            raise Exception(
+                "Only one among sz_min_str or sz_max_str provided in update_entity")
+
         try:
             w = int(w_str)
             h = int(h_str)
@@ -165,11 +170,14 @@ class FillForm(ui.UI):
 
         radio = tk.Radiobutton(
             frame,
-            variable=cls.radio_selection,
-            value=id(e),
+            value=index,
             text=e.get_name(max_length=40),
             command=partial(cls.select_entity, index),
         )
+        if cls.radio_selected_index == index:
+            radio.select()
+        else:
+            radio.deselect()
         radio.pack(side=tk.LEFT)
 
         img = ImageTk.PhotoImage(e.get_thumbnail(ENTRY_IMAGE_SZ))
