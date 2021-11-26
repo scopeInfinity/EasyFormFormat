@@ -7,7 +7,7 @@ import threading
 import signal
 import logging
 
-SCREEN_SIZE = (1024, 768)
+SCREEN_SIZE = (800, 600)
 WINDOW_ICON = "eff.png"
 
 

@@ -8,6 +8,12 @@ from data import state
 
 import tkinter as tk
 
+BG_COLOR_UPPER = "#40B5BC"
+FG_COLOR_UPPER = "WHITE"
+BG_COLOR_LOWER = "#D3DACE"
+BG_COLOR_BUTTON = BG_COLOR_UPPER
+FG_COLOR_TEXT = "WHITE"
+
 
 @dialog.dec_useraction
 def new_project():
@@ -32,23 +38,65 @@ class Home(ui.UI):
     @classmethod
     def draw(cls):
         root = window.Window.get_tk()
-        tk.Label(
+
+        upper_frame = tk.Frame(
             root,
-            text="Easy Form Format",
-            pady=ui.FRAME_BORDER*32,
-            font=("Courier", 64),
-        ).pack(side=tk.TOP)
+            bg=BG_COLOR_UPPER,
+        )
+        upper_frame.pack(
+            side=tk.LEFT,
+            fill='both',
+            expand=True,
+        )
+
+        tk.Label(
+            upper_frame,
+            text="Easy\nForm\nFormat",
+            font=("Roboto", 48, "bold"),
+            bg=BG_COLOR_UPPER,
+            fg=FG_COLOR_UPPER,
+        ).place(
+            relx=0.5,
+            rely=0.5,
+            anchor="center"
+        )
+
+        lower_frame = tk.Frame(
+            root,
+            bg=BG_COLOR_LOWER,
+        )
+        lower_frame.pack(
+            side=tk.LEFT,
+            fill='both',
+            expand=True,
+        )
 
         tk.Button(
-            root,
+            lower_frame,
             text="New Project",
             command=new_project,
-            pady=ui.FRAME_BORDER*8,
-        ).pack(side=tk.TOP)
+            font=("Roboto", 16),
+            bg=BG_COLOR_BUTTON,
+            fg=FG_COLOR_TEXT,
+        ).place(
+            relx=0.5,
+            rely=0.4,
+            relwidth=0.5,
+            relheight=0.1,
+            anchor="center",
+        )
 
         tk.Button(
-            root,
+            lower_frame,
             text="Load Project",
             command=load_project,
-            pady=ui.FRAME_BORDER*8,
-        ).pack(side=tk.TOP)
+            font=("Roboto", 16),
+            bg=BG_COLOR_BUTTON,
+            fg=FG_COLOR_TEXT,
+        ).place(
+            relx=0.5,
+            rely=0.6,
+            relwidth=0.5,
+            relheight=0.1,
+            anchor="center",
+        )
