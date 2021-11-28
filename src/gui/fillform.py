@@ -1,15 +1,26 @@
-import logging
 from data.exporter import generic
 from data import image, entity
 from data import state
-from gui import ui, window, dialog
-import tkinter as tk
-from PIL import ImageTk
+from gui import ui, window, dialog, color
 
-from typing import Optional
 from functools import partial
+from PIL import ImageTk
+from typing import Optional
+import logging
+import tkinter as tk
+from tkinter import ttk
 
-ENTRY_IMAGE_SZ = (80, 80)
+ENTRY_IMAGE_SZ = (60, 60)
+THUMBNAIL_IMAGE_SZ = (320, 320)
+
+COLOR_TITLE_BG = color.BG_SECONDARY
+COLOR_TITLE_FG = color.FG_SECONDARY
+
+COLOR_LEFT_BG = color.BG_PRIMARY
+COLOR_LEFT_TEXT = 'BLACK'
+
+COLOR_RIGHT_BG = color.BG_SECONDARY
+COLOR_RIGHT_TEXT = color.FG_SECONDARY
 
 
 def get_resolution(width: str, height: str):
@@ -165,7 +176,7 @@ class FillForm(ui.UI):
     def populate_entity(cls, index: int, pframe: tk.Tk, e: entity.Entity):
         frame = tk.Frame(
             pframe,
-            height='100',
+            bg=COLOR_LEFT_BG,
         )
 
         radio = tk.Radiobutton(
@@ -173,6 +184,9 @@ class FillForm(ui.UI):
             value=index,
             text=e.get_name(max_length=40),
             command=partial(cls.select_entity, index),
+            bg=COLOR_LEFT_BG,
+            fg=COLOR_LEFT_TEXT,
+            highlightthickness=0,
         )
         if cls.radio_selected_index == index:
             radio.select()
@@ -192,10 +206,22 @@ class FillForm(ui.UI):
 
     @classmethod
     def populate_entity_details(cls, pframe: tk.Tk, e: entity.Entity):
+        mframe = tk.Frame(
+            pframe,
+            bg=COLOR_RIGHT_BG,
+        )
+        mframe.pack(side=tk.LEFT, expand=True, fill='y')
+        rframe = tk.Frame(
+            pframe,
+            bg=COLOR_RIGHT_BG,
+        )
+        rframe.pack(side=tk.RIGHT, expand=True, fill='both')
+
         if e is None:
             tk.Label(
                 pframe,
                 text="Please select a option",
+                bg=COLOR_RIGHT_BG,
             ).pack(side=tk.TOP)
             return
         img_format = tk.StringVar()
@@ -227,29 +253,102 @@ class FillForm(ui.UI):
 
         # TODO: We should have auto save for entities.
         tk.Button(
-            pframe,
+            mframe,
             text='Save',
             command=save_details,
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
         tk.Button(
-            pframe,
+            mframe,
             text='Add Image',
             command=partial(cls.add_image_in_entity, e),
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
         tk.Entry(
-            pframe,
+            mframe,
             textvariable=name_var,
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
 
+        tk.Label(
+            mframe,
+            text="resolution WxH",
+            borderwidth=ui.FRAME_BORDER,
+            bg=COLOR_RIGHT_BG,
+        ).pack(side=tk.TOP)
+        tk.Entry(
+            mframe,
+            textvariable=res_w_var,
+            borderwidth=ui.FRAME_BORDER,
+        ).pack(side=tk.TOP)
+        tk.Entry(
+            mframe,
+            textvariable=res_h_var,
+            borderwidth=ui.FRAME_BORDER,
+        ).pack(side=tk.TOP)
+
+        tk.Label(
+            mframe,
+            text="quality min_size max_size in KB",
+            borderwidth=ui.FRAME_BORDER,
+            bg=COLOR_RIGHT_BG,
+        ).pack(side=tk.TOP)
+        tk.Entry(
+            mframe,
+            textvariable=size_min_kb,
+            borderwidth=ui.FRAME_BORDER,
+        ).pack(side=tk.TOP)
+        tk.Entry(
+            mframe,
+            textvariable=size_max_kb,
+            borderwidth=ui.FRAME_BORDER,
+        ).pack(side=tk.TOP)
+
+        drop = tk.OptionMenu(
+            mframe,
+            img_format,
+            *[fmt.name for fmt in e.get_allowed_fmts()],
+        )
+        drop.pack(side=tk.TOP)
+
+        scrollview_bar = tk.Scrollbar(rframe, orient='vertical')
+        scrollview_bar.pack(
+            side=tk.RIGHT,
+            fill='y',
+        )
+        scrollview_canvas = tk.Canvas(
+            rframe,
+            yscrollcommand=scrollview_bar.set,
+            bg=COLOR_RIGHT_BG,
+        )
+        scrollview_canvas.pack(
+            side=tk.RIGHT,
+            fill='y')
+
+        scrollview_frame = ttk.Frame(
+            scrollview_canvas,
+        )
+
+        scrollview_bar.config(command=scrollview_canvas.yview)
+        scrollview_frame.bind(
+            "<Configure>",
+            lambda e: scrollview_canvas.configure(
+                scrollregion=scrollview_canvas.bbox("all")
+            )
+        )
+        scrollview_canvas.create_window(
+            0, 0, anchor="nw", window=scrollview_frame)
+        scrollview_canvas.configure(yscrollcommand=scrollview_bar.set)
+
         thumbnails_count = e.get_images_count()
-        thumbnails = e.get_all_images_thumbnail(ENTRY_IMAGE_SZ)
+        thumbnails = e.get_all_images_thumbnail(THUMBNAIL_IMAGE_SZ)
         for it, t in enumerate(thumbnails):
-            fr = tk.Frame(pframe)
+            fr = tk.Frame(
+                scrollview_frame,
+                bg=COLOR_RIGHT_BG,
+            )
             img = ImageTk.PhotoImage(t)
             image_holder = tk.Label(
                 fr,
@@ -264,7 +363,9 @@ class FillForm(ui.UI):
                       text="x",
                       state=tk.DISABLED if thumbnails_count == 1 else None,
                       command=partial(cls.entity_image_del, e, it),
-                      ).pack(side=tk.TOP)
+                      ).pack(
+                          side=tk.TOP,
+            )
             tk.Button(fr_subbuttons,
                       text="^",
                       state=tk.DISABLED if it == 0 else None,
@@ -279,52 +380,17 @@ class FillForm(ui.UI):
 
             fr.pack(side=tk.TOP)
 
-        tk.Label(
-            pframe,
-            text="resolution WxH",
-            borderwidth=ui.FRAME_BORDER,
-        ).pack(side=tk.TOP)
-        tk.Entry(
-            pframe,
-            textvariable=res_w_var,
-            borderwidth=ui.FRAME_BORDER,
-        ).pack(side=tk.TOP)
-        tk.Entry(
-            pframe,
-            textvariable=res_h_var,
-            borderwidth=ui.FRAME_BORDER,
-        ).pack(side=tk.TOP)
-
-        tk.Label(
-            pframe,
-            text="quality min_size max_size in KB",
-            borderwidth=ui.FRAME_BORDER,
-        ).pack(side=tk.TOP)
-        tk.Entry(
-            pframe,
-            textvariable=size_min_kb,
-            borderwidth=ui.FRAME_BORDER,
-        ).pack(side=tk.TOP)
-        tk.Entry(
-            pframe,
-            textvariable=size_max_kb,
-            borderwidth=ui.FRAME_BORDER,
-        ).pack(side=tk.TOP)
-
-        drop = tk.OptionMenu(
-            pframe,
-            img_format,
-            *[fmt.name for fmt in e.get_allowed_fmts()],
-        )
-        drop.pack(side=tk.TOP)
-
     @classmethod
     def draw(cls):
         root = window.Window.get_tk()
         p = state.get_state().get_project()
 
         # Menu bar
-        menubar = tk.Menu(root)
+        menubar = tk.Menu(
+            root,
+            bg=COLOR_TITLE_BG,
+            fg=COLOR_TITLE_FG,
+        )
         root.config(menu=menubar)
         m_file = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label='File', menu=m_file)
@@ -332,6 +398,10 @@ class FillForm(ui.UI):
         # TODO: Currently we have "save as", we should also have simple save.
         m_file.add_command(label='Save Project', command=cls.save_project)
         m_file.add_command(label='Load Project', command=cls.load_project)
+        m_file.add_separator()
+        # TODO: human can export all where there
+        # are unsaved changes for current image.
+        m_file.add_command(label='Export All', command=cls.export_all)
         m_file.add_separator()
         m_file.add_command(label='Exit', command=cls._exit)
 
@@ -341,40 +411,42 @@ class FillForm(ui.UI):
         m_help.add_command(label='Get Started')
         m_help.add_command(label='About', command=cls.show_about)
 
-        # Note: human can press "export all" where there
-        # are unsaved changes for current image
-        tk.Button(
-            root,
-            text='Export All',
-            command=cls.export_all,
-            borderwidth=ui.FRAME_BORDER,
-            pady=ui.FRAME_BORDER,
-        ).pack(side=tk.BOTTOM)
-
-        # Left Side
-        frame_entities = tk.Frame(
+        # Frames
+        lframe = tk.Frame(
             root,
             borderwidth=ui.FRAME_BORDER,
+            bg=COLOR_LEFT_BG,
         )
+        rframe = tk.Frame(
+            root,
+            borderwidth=ui.FRAME_BORDER,
+            bg=COLOR_RIGHT_BG,
+        )
+        lframe.place(
+            relheight=1,
+            relwidth=0.3,
+            relx=0,
+            rely=0)
+        rframe.place(
+            relheight=1,
+            relwidth=0.7,
+            relx=0.3,
+            rely=0)
+
+        # Left side
 
         tk.Button(
-            frame_entities,
+            lframe,
             text="Add entries",
             command=cls.add_entries,
             pady=ui.FRAME_BORDER,
             borderwidth=ui.FRAME_BORDER,
         ).pack(side=tk.TOP)
         for it, e in enumerate(p.get_entities()):
-            cls.populate_entity(it, frame_entities, e)
-        frame_entities.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            cls.populate_entity(it, lframe, e)
 
         # Right Side
-        frame_details = tk.Frame(
-            root,
-            borderwidth=ui.FRAME_BORDER,
-        )
         selected_entity = None
         if cls.radio_selected_index >= 0 and cls.radio_selected_index < len(p.get_entities()):
             selected_entity = p.get_entities()[cls.radio_selected_index]
-        cls.populate_entity_details(frame_details, selected_entity)
-        frame_details.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        cls.populate_entity_details(rframe, selected_entity)
