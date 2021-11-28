@@ -1,18 +1,12 @@
-from os import stat
-from pickle import load
+
 from gui import ui
 from gui import window
 from gui import fillform
 from gui import dialog
+from gui import color
 from data import state
 
 import tkinter as tk
-
-BG_COLOR_UPPER = "#40B5BC"
-FG_COLOR_UPPER = "WHITE"
-BG_COLOR_LOWER = "#D3DACE"
-BG_COLOR_BUTTON = BG_COLOR_UPPER
-FG_COLOR_TEXT = "WHITE"
 
 
 @dialog.dec_useraction
@@ -41,7 +35,7 @@ class Home(ui.UI):
 
         upper_frame = tk.Frame(
             root,
-            bg=BG_COLOR_UPPER,
+            bg=color.BG_PRIMARY,
         )
         upper_frame.pack(
             side=tk.LEFT,
@@ -53,8 +47,8 @@ class Home(ui.UI):
             upper_frame,
             text="Easy\nForm\nFormat",
             font=("Roboto", 48, "bold"),
-            bg=BG_COLOR_UPPER,
-            fg=FG_COLOR_UPPER,
+            bg=color.BG_PRIMARY,
+            fg=color.FG_PRIMARY,
         ).place(
             relx=0.5,
             rely=0.5,
@@ -63,7 +57,7 @@ class Home(ui.UI):
 
         lower_frame = tk.Frame(
             root,
-            bg=BG_COLOR_LOWER,
+            bg=color.BG_SECONDARY,
         )
         lower_frame.pack(
             side=tk.LEFT,
@@ -76,8 +70,8 @@ class Home(ui.UI):
             text="New Project",
             command=new_project,
             font=("Roboto", 16),
-            bg=BG_COLOR_BUTTON,
-            fg=FG_COLOR_TEXT,
+            bg=color.BG_PRIMARY,
+            fg=color.FG_SECONDARY,
         ).place(
             relx=0.5,
             rely=0.4,
@@ -91,8 +85,8 @@ class Home(ui.UI):
             text="Load Project",
             command=load_project,
             font=("Roboto", 16),
-            bg=BG_COLOR_BUTTON,
-            fg=FG_COLOR_TEXT,
+            bg=color.BG_PRIMARY,
+            fg=color.FG_SECONDARY,
         ).place(
             relx=0.5,
             rely=0.6,
