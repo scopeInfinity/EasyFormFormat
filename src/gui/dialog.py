@@ -1,6 +1,8 @@
 import tkinter.filedialog
 from tkinter import messagebox
 
+import logging
+
 
 def load_images():
     fnames = tkinter.filedialog.askopenfilenames(filetypes=[
@@ -54,6 +56,9 @@ def dec_ui_useraction(f):
         except ValueError as e:
             # invalid user input
             popup_error("Invalid Input", str(e))
+        except Exception as e:
+            logging.error("Internal error: %s", e)
+            popup_error("Internal Error", str(e))
         finally:
             cls.redraw()
     return new_f
@@ -69,4 +74,7 @@ def dec_ui_useraction_noredraw(f):
         except ValueError as e:
             # invalid user input
             popup_error("Invalid Input", str(e))
+        except Exception as e:
+            logging.error("Internal error: %s", e)
+            popup_error("Internal Error", str(e))
     return new_f

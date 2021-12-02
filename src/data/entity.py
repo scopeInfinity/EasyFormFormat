@@ -24,6 +24,9 @@ class Entity:
             return self.name
         return self.name[:max_length]
 
+    def get_raw_images(self) -> List[PILImage.Image]:
+        return self.images
+
     def get_thumbnail(self, sz: Tuple[int, int]) -> PILImage.Image:
         assert len(self.images) > 0, "atleast one image is expected for thumbnail"
         return self.images[0].get_scaled_image(sz)
@@ -76,8 +79,9 @@ class Entity:
     def get_export_filename(self, dir: str) -> str:
         opts = self.get_export_options()
         fmt = opts.format
+        extension = image.get_extension(fmt)
         ofname = os.path.join(dir, "{}.{}".format(
-            self.name, fmt))
+            self.name, extension))
         return ofname
 
     def export(self, dir: str) -> None:

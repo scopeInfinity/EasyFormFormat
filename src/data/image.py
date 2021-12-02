@@ -11,6 +11,10 @@ class ImageFormat(Enum):
     PDF = 3
 
 
+def get_extension(fmt: ImageFormat) -> str:
+    return fmt.name.lower()
+
+
 class ExportOption:
     def __init__(self,
                  format: ImageFormat,
