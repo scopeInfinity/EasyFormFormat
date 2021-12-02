@@ -26,14 +26,15 @@ Application to help users to save time while filling various forms online which 
 - [X] PNG
   - [ ] File resize pending
 - [X] PDF
-- [ ] PDF in standard size (A4, etc)
+- [ ] Export in standard size (A4, etc)
 
 #### Complex
+- [X] Add multiple images in entity.
 - [ ] Merge multiple photo into single photo
-- [ ] Create multiple page PDF
+- [X] Create multiple page PDF
 
 #### Project
-- [ ] Save/load option
+- [X] Save/load option
 - [ ] Backward compatible
 
 #### Users Feedback
