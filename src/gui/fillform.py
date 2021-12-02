@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import ttk
 
 ENTRY_IMAGE_SZ = (60, 60)
-THUMBNAIL_IMAGE_SZ = (320, 320)
+THUMBNAIL_IMAGE_SZ = (200, 200)
 
 COLOR_TITLE_BG = color.BG_SECONDARY
 COLOR_TITLE_FG = color.FG_SECONDARY
@@ -87,7 +87,7 @@ class FillForm(ui.UI):
         state.get_state().get_project().add_entity(fnames)
 
     @classmethod
-    @dialog.dec_ui_useraction_noredraw
+    @dialog.dec_ui_useraction
     def update_entity(cls,
                       e: entity.Entity,
                       name: Optional[str] = None,
@@ -365,17 +365,22 @@ class FillForm(ui.UI):
                       command=partial(cls.entity_image_del, e, it),
                       ).pack(
                           side=tk.TOP,
+                          fill='x',
             )
             tk.Button(fr_subbuttons,
                       text="^",
                       state=tk.DISABLED if it == 0 else None,
                       command=partial(cls.entity_image_move_up, e, it),
-                      ).pack(side=tk.TOP)
+                      ).pack(side=tk.TOP,
+                             fill='x',
+                             )
             tk.Button(fr_subbuttons,
                       text="v",
                       state=tk.DISABLED if it == thumbnails_count-1 else None,
                       command=partial(cls.entity_image_move_down, e, it),
-                      ).pack(side=tk.TOP)
+                      ).pack(side=tk.TOP,
+                             fill='x',
+                             )
             fr_subbuttons.pack(side=tk.RIGHT)
 
             fr.pack(side=tk.TOP)

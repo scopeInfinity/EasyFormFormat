@@ -1,24 +1,22 @@
 import logging
-from data import image
+from data import entity
 from data.exporter import generic
 
 
-def export(img: image.Image, fname: str):
-    fmt = img.get_export_format()
-    res = fmt.get_resolution()
-    new_img = img.get_scaled_image(res)
+def export(e: entity.Entity, fname: str):
+    opts = e.get_export_options()
+    fmt = opts.get_format()
+    res = opts.get_resolution()
 
-    def tmp_exporter(fname, quality):
-        return new_img.save(fname,
-                            save_all=True,
-                            append_images=[],
-                            quality=quality)
+    images = e.get_all_images_thumbnail(res)
+    assert len(images) > 0
 
     generic.get_image_quality(
         fname,
-        fmt.get_quality_minsize_kb(),
-        fmt.get_quality_maxsize_kb(),
-        tmp_exporter,
+        opts.get_size_min_kb(),
+        opts.get_size_max_kb(),
+        lambda fname, quality: images[0].save(
+            fname, save_all=True, append_images=images[1:], quality=quality),
         preserve_image=True,
     )
-    logging.info(f"saved jpeg at {fname}")
+    logging.info(f"saved pdf at {fname}")
