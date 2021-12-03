@@ -1,13 +1,14 @@
 from data import entity
 from data.exporter import generic
+from util import serialization
 
 import logging
-from typing import Optional, List
-import pickle
+from typing import List
 import os
+import json
 
 
-class Project:
+class Project(serialization.Serializable):
     def __init__(self) -> None:
         logging.info("project created")
         self.entities = []  # type: List[entity.Entity]
@@ -22,17 +23,29 @@ class Project:
     def get_entities(self) -> List[entity.Entity]:
         return self.entities
 
-    def save(self, fname: str) -> None:
+    def unmarshal(self, data):
+        self.entities.clear()
+        for d in data:
+            # lookahead within d
+            e = entity.Entity(self.unmarshal_get_value(d, "name", str))
+            e.unmarshal(d)
+            self.entities.append(e)
+
+    def marshal(self):
+        lst = []
+        for e in self.entities:
+            lst.append(e.marshal())
+        return lst
+
+    def save_project(self, fname: str) -> None:
         logging.info(f"saving project to {fname}")
-        with open(fname, 'wb') as f:
-            pickle.dump(self.__dict__, f)
+        with open(fname, 'w', encoding='utf-8') as f:
+            json.dump(self.marshal(), f, indent=4)
 
-    def load(self, fname: str) -> None:
+    def load_project(self, fname: str) -> None:
         logging.info(f"loading project from {fname}")
-
-        with open(fname, 'rb') as f:
-            # unsafe operation
-            self.__dict__ = pickle.load(f)
+        with open(fname, 'r', encoding='utf-8') as f:
+            self.unmarshal(json.load(f))
 
     def export_prep(self, dname: str) -> None:
         for e in self.entities:

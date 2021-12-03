@@ -1,5 +1,6 @@
 from data import image
 from data.exporter import pdf, simple_image_fmt
+from util.serialization import Serializable
 
 from PIL import Image as PILImage
 from typing import List, Optional, Tuple
@@ -7,13 +8,30 @@ import os
 import copy
 
 
-class Entity:
+class Entity(Serializable):
     def __init__(self, name: str, fnames: Optional[List[str]] = None) -> None:
         self.name = name
         self.images = []  # type: List[image.Image]
-        self.add_images(fnames)
         self.opts = copy.deepcopy(image.DEFAULT_EXPORT_OPTION)
-        self.opts.set_resolution(self.images[0].get_original_size())
+        if fnames:
+            self.add_images(fnames, update_resolution=True)
+
+    def unmarshal(self, data):
+        # data["name"] is also unsed in project.py as lookahead.
+        self.set_name(self.unmarshal_get_value(data, "name", str))
+        self.images.clear()
+        files = []
+        for f in self.unmarshal_get_value(data, "images"):
+            files.append(self.unmarshal_value(f, str))
+        self.add_images(files)
+        self.opts.unmarshal(self.unmarshal_get_value(data, "opts"))
+
+    def marshal(self):
+        d = {}
+        d["name"] = self.get_name()
+        d["images"] = [d.get_fname() for d in self.images]
+        d["opts"] = self.opts.marshal()
+        return d
 
     def set_name(self, name: str) -> None:
         self.name = name
@@ -37,9 +55,13 @@ class Entity:
             lst.append(img.get_scaled_image(sz))
         return lst
 
-    def add_images(self, fnames: List[str]) -> None:
+    def add_images(self, fnames: List[str], update_resolution: Optional[bool] = False) -> None:
         for fname in fnames:
             self.images.append(image.Image(fname))
+
+        if self.images and update_resolution:
+            self.opts.set_resolution(self.images[0].get_original_size())
+
         # Auto convert image format to PDF if there are more than one image.
         if len(self.images) > 1:
             self.update_export_options(fmt=image.ImageFormat.PDF)

@@ -57,6 +57,7 @@ def dec_ui_useraction(f):
             # invalid user input
             popup_error("Invalid Input", str(e))
         except Exception as e:
+            logging.exception(e)
             logging.error("Internal error: %s", e)
             popup_error("Internal Error", str(e))
         finally:
@@ -75,6 +76,7 @@ def dec_ui_useraction_noredraw(f):
             # invalid user input
             popup_error("Invalid Input", str(e))
         except Exception as e:
+            logging.exception(e)
             logging.error("Internal error: %s", e)
             popup_error("Internal Error", str(e))
     return new_f

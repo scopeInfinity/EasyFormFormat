@@ -4,6 +4,8 @@ from enum import Enum
 
 from typing import Tuple
 
+from util.serialization import Serializable
+
 
 class ImageFormat(Enum):
     JPEG = 1
@@ -15,7 +17,7 @@ def get_extension(fmt: ImageFormat) -> str:
     return fmt.name.lower()
 
 
-class ExportOption:
+class ExportOption(Serializable):
     def __init__(self,
                  format: ImageFormat,
                  resolution: Tuple[int, int],
@@ -25,6 +27,23 @@ class ExportOption:
         self.resolution = resolution  # type: Tuple[int, int]
         self.min_size = min_size  # type: int
         self.max_size = max_size  # type: int
+
+    def unmarshal(self, data):
+        self.format = ImageFormat[self.unmarshal_get_value(data, "fmt", str)]
+        w = self.unmarshal_get_value(data, "res_w", int)
+        h = self.unmarshal_get_value(data, "res_h", int)
+        self.resolution = w, h
+        self.min_size = self.unmarshal_get_value(data, "min_size", int)
+        self.max_size = self.unmarshal_get_value(data, "max_size", int)
+
+    def marshal(self):
+        data = {}
+        data["fmt"] = self.format.name
+        data["res_w"] = self.resolution[0]
+        data["res_h"] = self.resolution[1]
+        data["min_size"] = self.min_size
+        data["max_size"] = self.max_size
+        return data
 
     def get_resolution(self) -> Tuple[int, int]:
         return self.resolution
