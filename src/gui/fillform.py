@@ -49,7 +49,7 @@ class FillForm(ui.UI):
         fname = dialog.save_project()
         if not fname:
             return
-        state.get_state().get_project().save(fname)
+        state.get_state().get_project().save_project(fname)
 
     @classmethod
     @dialog.dec_ui_useraction

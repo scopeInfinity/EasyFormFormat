@@ -33,7 +33,7 @@ class State:
     def load_new_project(self, fname: str):
         '''Expect the current project to be already open.'''
         logging.info("")
-        self.get_project().load(fname)
+        self.get_project().load_project(fname)
 
 
 instance = State()
