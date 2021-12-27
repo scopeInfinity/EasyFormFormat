@@ -3,9 +3,8 @@ from data import entity
 from data.exporter import generic
 
 
-def export(e: entity.Entity, fname: str):
+def export(e: 'entity.Entity', fname: str):
     opts = e.get_export_options()
-    fmt = opts.get_format()
     res = opts.get_resolution()
 
     images = e.get_all_images_thumbnail(res)

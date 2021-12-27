@@ -1,5 +1,5 @@
 from data import image
-from data.exporter import pdf, simple_image_fmt
+from data.exporter import pdf, jpeg, png
 from util.serialization import Serializable
 
 from PIL import Image as PILImage
@@ -114,8 +114,11 @@ class Entity(Serializable):
         if fmt not in self.get_allowed_fmts():
             raise ValueError("Invalid export type provided, please reselect.")
 
-        if fmt in [image.ImageFormat.JPEG, image.ImageFormat.PNG]:
-            return simple_image_fmt.export(self, ofname)
+        if fmt in [image.ImageFormat.JPEG]:
+            return jpeg.export(self, ofname)
+
+        if fmt in [image.ImageFormat.PNG]:
+            return png.export(self, ofname)
 
         if fmt in [image.ImageFormat.PDF]:
             return pdf.export(self, ofname)
