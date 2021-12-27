@@ -2,9 +2,6 @@ import os
 import logging
 from typing import Optional
 
-from data import image
-from data.exporter import pdf, simple_image_fmt
-
 
 class ExportException(Exception):
     pass
